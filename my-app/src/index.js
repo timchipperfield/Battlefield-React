@@ -14,9 +14,9 @@ class GameBoard extends React.Component {
 
   render() {
     return (
-      <div>
-        {this.state.ocean_tiles.map((item, index) =>          
-          (<button className="ocean_tile" value={"ocean-" + index}/>)
+      <div className="tile-set">
+        {this.state.ocean_tiles.map((item, index) =>
+          (<button className="ocean-tile" value={"ocean-" + index}/>)
         )}
       </div>
     );
