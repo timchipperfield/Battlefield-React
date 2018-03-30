@@ -31,12 +31,9 @@ class GameBoard extends React.Component {
 
           for (let i = 0; i < this.state.ships[key].length; i++) {
             if(this.state.ships[key][i] === null) {
-
-              var boatName = key;
+              // sets new tile number for boat placement
               var allBoats = this.state.ships;
-              var boatCells = this.state.ships[key];
               allBoats[key][i] = index
-
               this.setState({
                 ships: allBoats,
               })
@@ -47,9 +44,9 @@ class GameBoard extends React.Component {
           }
         }
       }
-
     }
   }
+  
 
   render() {
     return (
