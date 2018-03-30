@@ -12,17 +12,42 @@ class GameBoard extends React.Component {
       ocean_tiles: Array(100).fill(null),
       game_state: props.game_status,
       current_boat: props.current_boat,
-      aircraftCarrier: Array(6).fill(null),
-      battleship: Array(5).fill(null),
-      cruiser: Array(4).fill(null),
-      submarine: Array(3).fill(null),
-      destroyer: Array(2).fill(null),
+      ships: {
+        aircraftCarrier: Array(6).fill(null),
+        battleship: Array(5).fill(null),
+        cruiser: Array(4).fill(null),
+        submarine: Array(3).fill(null),
+        destroyer: Array(2).fill(null),
+      },
     };
   }
 
   handleClick(index) {
     if(this.state.game_state === 'setting boats') {
-      console.log(index);
+      // find first that is not filled already
+      for (var key in this.state.ships) {
+        if(this.state.ships[key].includes(null)) {
+          // loop inside each ship array looking for empty health slot / ocean tile
+
+          for (let i = 0; i < this.state.ships[key].length; i++) {
+            if(this.state.ships[key][i] === null) {
+
+              var boatName = key;
+              var allBoats = this.state.ships;
+              var boatCells = this.state.ships[key];
+              allBoats[key][i] = index
+
+              this.setState({
+                ships: allBoats,
+              })
+
+              console.log(this.state.ships);
+              return;
+            }
+          }
+        }
+      }
+
     }
   }
 
@@ -38,24 +63,6 @@ class GameBoard extends React.Component {
     );
   }
 
-}
-
-class Boat extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      aircraftCarrier: Array(6).fill(null),
-      battleship: Array(5).fill(null),
-      cruiser: Array(4).fill(null),
-      submarine: Array(3).fill(null),
-      destroyer: Array(2).fill(null),
-    };
-  }
-
-  setBoat(props) {
-
-    // must not be on the board
-  }
 }
 
 
