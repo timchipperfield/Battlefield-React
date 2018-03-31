@@ -11,7 +11,6 @@ class GameBoard extends React.Component {
     this.state = {
       ocean_tiles: Array(100).fill(null),
       game_state: props.game_status,
-      current_boat: props.current_boat,
       ships: {
         aircraftCarrier: Array(6).fill(null),
         battleship: Array(5).fill(null),
@@ -24,12 +23,11 @@ class GameBoard extends React.Component {
   }
 
   handleClick(index) {
-    if(this.state.game_state === 'setting boats') {
+    if(this.state.game_state === 'Placing Boats') {
       // find first that is not filled already
       for (var key in this.state.ships) {
         if(this.state.ships[key].includes(null)) {
           // loop inside each ship array looking for empty health slot / ocean tile
-
           for (let i = 0; i < this.state.ships[key].length; i++) {
             if(this.state.ships[key][i] === null) {
               // sets new tile number for boat placement
@@ -40,6 +38,8 @@ class GameBoard extends React.Component {
               })
 
               console.log(this.state.ships);
+              // switch game status to not place boats when placement complete
+              this.verifyAllShipsCompleted()
               return;
             }
           }
@@ -48,6 +48,19 @@ class GameBoard extends React.Component {
     }
   }
 
+  verifyAllShipsCompleted() {
+    var shipsFinished = Array(this.state.ships.length);
+    for (let key in this.state.ships) {
+      if(this.state.ships[key].includes(null)) {
+        shipsFinished.push(false);
+      } else {
+        shipsFinished.push(true);
+      }
+    }
+    if(!shipsFinished.includes(false)) {
+      this.props.status(this.state.game_state);
+    }
+  }
 
   render() {
     return (
@@ -60,9 +73,7 @@ class GameBoard extends React.Component {
       </div>
     );
   }
-
 }
-
 
 
 function capitalizeFirstLetter(string) {
@@ -74,8 +85,9 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.updateCurrentShip = this.updateCurrentShip.bind(this);
+    this.updateGameStatus = this.updateGameStatus.bind(this);
     this.state = {
-      status: 'setting boats',
+      status: 'Placing Boats',
       current_boat: null,
     };
   }
@@ -96,6 +108,12 @@ class Game extends React.Component {
     }
   }
 
+  updateGameStatus(previous_status) {
+    var current_status = previous_status === 'Placing Boats' ? 'Using Cannon' : 'Placing Boats'
+    this.setState({
+      status: current_status,
+    })
+  }
 
   render() {
     return (
@@ -103,7 +121,11 @@ class Game extends React.Component {
         <h2>Game: {this.state.status}</h2>
         <h3>Now Placing {this.state.current_boat}</h3>
         <div className="game-board">
-          <GameBoard game_status={this.state.status} current_boat={this.state.current_boat} ships={this.updateCurrentShip}/>
+          <GameBoard
+            game_status={this.state.status}
+            ships={this.updateCurrentShip}
+            status={this.updateGameStatus}
+          />
         </div>
       </div>
     );
