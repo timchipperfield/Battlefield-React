@@ -115,11 +115,27 @@ class Game extends React.Component {
     })
   }
 
+  renderHeader() {
+    if(this.state.status === 'Placing Boats') {
+      return (
+        <div>
+          <h2>Game: {this.state.status}</h2>
+          <h3>Now Placing {this.state.current_boat}</h3>
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <h2>Game: {this.state.status}</h2>
+        </div>
+      )
+    }
+  }
+
   render() {
     return (
       <div className="game">
-        <h2>Game: {this.state.status}</h2>
-        <h3>Now Placing {this.state.current_boat}</h3>
+        {this.renderHeader()};
         <div className="game-board">
           <GameBoard
             game_status={this.state.status}
