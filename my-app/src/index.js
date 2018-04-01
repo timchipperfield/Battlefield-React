@@ -67,12 +67,41 @@ class GameBoard extends React.Component {
       <div className="tile-set">
         {this.state.ocean_tiles.map((item, index) =>
           (<button className="ocean-tile"
+            title="A"
             value={"ocean-" + index}
-            onClick={() => {this.handleClick(index); this.props.ships(this.state.ships);}} />)
+            onClick={() => {this.handleClick(index); this.props.ships(this.state.ships);}}>
+            <GamePiece shipIndex={index} allShips={this.state.ships}/>
+           </button>)
         )}
       </div>
     );
   }
+}
+
+class GamePiece extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      shipIndex: props.shipIndex,
+      ships: props.allShips,
+    }
+  }
+
+  setPiece() {
+    var shipsFinished = Array(this.state.ships.length);
+    for (let key in this.state.ships) {
+      if(this.state.ships[key].includes(this.state.shipIndex)) {
+        // returns the first letter of the ship name on that tile
+        return capitalizeFirstLetter(key[0]);
+      }
+    }
+  }
+
+  render() {
+    return (
+      <p>{this.setPiece()}</p>
+    )
+  };
 }
 
 
