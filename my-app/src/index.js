@@ -7,10 +7,10 @@ import registerServiceWorker from './registerServiceWorker';
 class GameBoard extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
     this.state = {
       ocean_tiles: Array(100).fill(null),
       game_state: props.game_status,
+      current_boat: props.current_boat,
       ships: {
         aircraftCarrier: Array(6).fill(null),
         battleship: Array(5).fill(null),
@@ -24,27 +24,61 @@ class GameBoard extends React.Component {
 
   handleClick(index) {
     if(this.state.game_state === 'Placing Boats') {
-      // find first that is not filled already
-      for (var key in this.state.ships) {
-        if(this.state.ships[key].includes(null)) {
-          // loop inside each ship array looking for empty health slot / ocean tile
-          for (let i = 0; i < this.state.ships[key].length; i++) {
-            if(this.state.ships[key][i] === null) {
-              // sets new tile number for boat placement
-              var allBoats = this.state.ships;
-              allBoats[key][i] = index
-              this.setState({
-                ships: allBoats,
-              })
+      if(!this.verifyPlacementRules(index)) {
+        this.placeShip(index);
+      }
+    }
+  }
 
-              console.log(this.state.ships);
-              // switch game status to not place boats when placement complete
-              this.verifyAllShipsCompleted()
-              return;
-            }
+  placeShip(index) {
+    // find first that is not filled already
+    for (var key in this.state.ships) {
+      if(this.state.ships[key].includes(null)) {
+        // loop inside each ship array looking for empty health slot / ocean tile
+        for (let i = 0; i < this.state.ships[key].length; i++) {
+          if(this.state.ships[key][i] === null) {
+            // sets new tile number for boat placement
+            var allBoats = this.state.ships;
+            allBoats[key][i] = index
+            this.setState({
+              ships: allBoats,
+            })
+
+            console.log(this.state.ships);
+            // switch game status to not place boats when placement complete
+            this.verifyAllShipsCompleted();
+            return;
           }
         }
       }
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ current_boat: nextProps.current_boat });
+  }
+
+  verifyPlacementRules(boatIndex) {
+    for (let key in this.state.ships) {
+      // raise error if other ship in same spot
+      if(this.state.ships[key].includes(boatIndex)) {
+        console.log('error! Each boat piece must have its own tile');
+        return true;
+      }
+    }
+
+    var currentBoat = this.state.current_boat;
+    var shipArrFiltered = this.state.ships[currentBoat].filter(n => n);
+    if (shipArrFiltered === undefined || shipArrFiltered.length == 0) {
+      return false;
+    }
+
+    var shipMax = Math.max(...shipArrFiltered);
+    var shipMin = Math.min(...shipArrFiltered);
+
+    if (!(boatIndex === shipMax + 1 || boatIndex === shipMin - 1)) {
+      console.log('error! Must place ship in adjacent tile');
+      return true;
     }
   }
 
@@ -88,7 +122,6 @@ class GamePiece extends React.Component {
   }
 
   setPiece() {
-    var shipsFinished = Array(this.state.ships.length);
     for (let key in this.state.ships) {
       if(this.state.ships[key].includes(this.state.shipIndex)) {
         // returns the first letter of the ship name on that tile
@@ -118,22 +151,26 @@ class Game extends React.Component {
     this.state = {
       status: 'Placing Boats',
       current_boat: null,
+      error: null,
     };
   }
 
   updateCurrentShip(ships) {
     for (let key in ships) {
       if(ships[key].includes(null)) {
-        if (key === "aircraftCarrier") {
-          var ship = "Aircraft Carrier"
-        } else {
-          var ship = capitalizeFirstLetter(key);
-        }
         this.setState({
-          current_boat: ship,
+          current_boat: key,
         })
         return;
       }
+    }
+  }
+
+  renderShipTitle() {
+    if (this.state.current_boat === "aircraftCarrier") {
+      return "Aircraft Carrier"
+    } else if (typeof this.state.current_boat === 'string') {
+      return capitalizeFirstLetter(this.state.current_boat);
     }
   }
 
@@ -149,7 +186,7 @@ class Game extends React.Component {
       return (
         <div>
           <h2>Game: {this.state.status}</h2>
-          <h3>Now Placing {this.state.current_boat}</h3>
+          <h3>Now Placing {this.renderShipTitle()}</h3>
         </div>
       )
     } else {
@@ -161,15 +198,27 @@ class Game extends React.Component {
     }
   }
 
+  renderError() {
+    if(this.state.error != null) {
+      return (
+        <div>
+          <h3>{this.state.error}</h3>
+        </div>
+      )
+    }
+  }
+
   render() {
     return (
       <div className="game">
-        {this.renderHeader()};
+        {this.renderHeader()}
+        {this.renderError()}
         <div className="game-board">
           <GameBoard
             game_status={this.state.status}
             ships={this.updateCurrentShip}
             status={this.updateGameStatus}
+            current_boat={this.state.current_boat}
           />
         </div>
       </div>
