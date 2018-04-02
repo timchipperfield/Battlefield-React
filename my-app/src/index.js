@@ -24,13 +24,14 @@ class GameBoard extends React.Component {
 
   handleClick(index) {
     if(this.state.game_state === 'Placing Boats') {
-      if(!this.verifyPlacementRules(index)) {
-        this.placeShip(index);
+      var direction = ""
+      if(!this.raisePlacementError(index, direction)) {
+        this.placeShip(index, direction);
       }
     }
   }
 
-  placeShip(index) {
+  placeShip(index, direction) {
     // find first that is not filled already
     for (var key in this.state.ships) {
       if(this.state.ships[key].includes(null)) {
@@ -39,7 +40,12 @@ class GameBoard extends React.Component {
           if(this.state.ships[key][i] === null) {
             // sets new tile number for boat placement
             var allBoats = this.state.ships;
-            allBoats[key][i] = index
+
+            allBoats[key].map((item, newIndex) => (
+              allBoats[key].push(newIndex + index)
+            ))
+            var filteredBoat = allBoats[key].filter(n => n);
+            allBoats[key] = filteredBoat;
             this.setState({
               ships: allBoats,
             })
@@ -58,9 +64,8 @@ class GameBoard extends React.Component {
     this.setState({ current_boat: nextProps.current_boat });
   }
 
-  verifyPlacementRules(boatIndex) {
+  raisePlacementError(boatIndex, direction) {
     for (let key in this.state.ships) {
-      // raise error if other ship in same spot
       if(this.state.ships[key].includes(boatIndex)) {
         console.log('error! Each boat piece must have its own tile');
         return true;
@@ -73,13 +78,17 @@ class GameBoard extends React.Component {
       return false;
     }
 
-    var shipMax = Math.max(...shipArrFiltered);
-    var shipMin = Math.min(...shipArrFiltered);
+    console.log(shipArrFiltered);
 
-    if (!(boatIndex === shipMax + 1 || boatIndex === shipMin - 1)) {
-      console.log('error! Must place ship in adjacent tile');
-      return true;
-    }
+
+    // var shipMax = Math.max(...shipArrFiltered);
+    // var shipMin = Math.min(...shipArrFiltered);
+    // var horizontalIndexBad = !(boatIndex === shipMax + 1 || boatIndex === shipMin - 1)
+    //
+    // if (horizontalIndexBad) {
+    //   console.log('error! Must place ship in adjacent tile');
+    //   return true;
+    // }
   }
 
   verifyAllShipsCompleted() {
