@@ -10,7 +10,6 @@ class GameBoard extends React.Component {
     this.state = {
       ocean_tiles: Array(100).fill(null),
       game_state: props.game_status,
-      current_boat: props.current_boat,
       ships: {
         aircraftCarrier: Array(6).fill(null),
         battleship: Array(5).fill(null),
@@ -24,9 +23,8 @@ class GameBoard extends React.Component {
 
   handleClick(index) {
     if(this.state.game_state === 'Placing Boats') {
-      var direction = ""
-      if(!this.raisePlacementError(index, direction)) {
-        this.placeShip(index, direction);
+      if(!this.raisePlacementError(index, this.state.ship_direction)) {
+        this.placeShip(index, this.state.ship_direction);
       }
     }
   }
@@ -40,9 +38,10 @@ class GameBoard extends React.Component {
           if(this.state.ships[key][i] === null) {
             // sets new tile number for boat placement
             var allBoats = this.state.ships;
+            var directionMultiplier = direction === 'horizontal' ? 1 : 10
 
             allBoats[key].map((item, newIndex) => (
-              allBoats[key].push(newIndex + index)
+              allBoats[key].push((newIndex * directionMultiplier) + index)
             ))
             var filteredBoat = allBoats[key].filter(n => n);
             allBoats[key] = filteredBoat;
@@ -61,7 +60,9 @@ class GameBoard extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ current_boat: nextProps.current_boat });
+    this.setState({ current_boat: nextProps.current_boat,
+                    ship_direction: nextProps.ship_direction,
+                  });
   }
 
   raisePlacementError(boatIndex, direction) {
@@ -161,6 +162,7 @@ class Game extends React.Component {
       status: 'Placing Boats',
       current_boat: null,
       error: null,
+      ship_direction: 'horizontal',
     };
   }
 
@@ -190,12 +192,22 @@ class Game extends React.Component {
     })
   }
 
+  handleDirectionChange() {
+    var direction = this.state.ship_direction === 'horizontal' ? 'vertical' : 'horizontal';
+    this.setState({
+      ship_direction: direction,
+    })
+  }
+
   renderHeader() {
     if(this.state.status === 'Placing Boats') {
       return (
         <div>
           <h2>Game: {this.state.status}</h2>
-          <h3>Now Placing {this.renderShipTitle()}</h3>
+          <div>
+            <h3>Now Placing {this.renderShipTitle()}</h3>
+            <button onClick={() => {this.handleDirectionChange();}}>Toggle Direction</button>
+          </div>
         </div>
       )
     } else {
@@ -228,6 +240,7 @@ class Game extends React.Component {
             ships={this.updateCurrentShip}
             status={this.updateGameStatus}
             current_boat={this.state.current_boat}
+            ship_direction={this.state.ship_direction}
           />
         </div>
       </div>
