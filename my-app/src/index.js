@@ -60,16 +60,24 @@ class GameBoard extends React.Component {
   }
 
   raisePlacementError(newBoat) {
-    // rule 1: ship cannot be placed on top of another ship
     for (let key in this.state.ships) {
       for (let i = 0; i < newBoat.length; i++) {
+        // rule 1: ship cannot be placed on top of another ship
         if (this.state.ships[key].includes(newBoat[i])) {
           console.log('error! Each boat piece must have its own tile');
           return true;
         }
+
+        // rule 2: ship must be on the board - vertical check
+        if (newBoat[i] > this.state.ocean_tiles.length) {
+          console.log('error! Boat pieces must be placed on the board');
+          return true;
+        }
+
+        // rule 3: ship cannot wrap into next row - horizontal check
       }
+
     }
-    // rule 2: ship must be on the board
   }
 
   verifyAllShipsCompleted() {
