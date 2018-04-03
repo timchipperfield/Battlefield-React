@@ -23,40 +23,34 @@ class GameBoard extends React.Component {
 
   handleClick(index) {
     if(this.state.game_state === 'Placing Boats') {
-      if(!this.raisePlacementError(index, this.state.ship_direction)) {
-        this.placeShip(index, this.state.ship_direction);
+      var newShip = this.getNewShip(index);
+      if(!this.raisePlacementError(newShip)) {
+        this.placeShip(newShip);
       }
     }
   }
 
-  placeShip(index, direction) {
-    // find first that is not filled already
-    for (var key in this.state.ships) {
-      if(this.state.ships[key].includes(null)) {
-        // loop inside each ship array looking for empty health slot / ocean tile
-        for (let i = 0; i < this.state.ships[key].length; i++) {
-          if(this.state.ships[key][i] === null) {
-            // sets new tile number for boat placement
-            var allBoats = this.state.ships;
-            var directionMultiplier = direction === 'horizontal' ? 1 : 10
+  placeShip(newBoat) {
+    var allBoats = this.state.ships;
+    allBoats[this.state.current_boat] = newBoat;
+    this.setState({
+      ships: allBoats,
+    })
+    this.verifyAllShipsCompleted();
+    return;
+  }
 
-            allBoats[key].map((item, newIndex) => (
-              allBoats[key].push((newIndex * directionMultiplier) + index)
-            ))
-            var filteredBoat = allBoats[key].filter(n => n);
-            allBoats[key] = filteredBoat;
-            this.setState({
-              ships: allBoats,
-            })
+  getNewShip(tile_index) {
+    var boat_length = this.state.ships[this.state.current_boat].length
+    var new_boat = Array(boat_length).fill(null);
 
-            console.log(this.state.ships);
-            // switch game status to not place boats when placement complete
-            this.verifyAllShipsCompleted();
-            return;
-          }
-        }
-      }
+    var direction = this.state.ship_direction;
+    var directionMultiplier = direction === 'horizontal' ? 1 : 10;
+
+    for (let i = 0; i < boat_length; i++) {
+      new_boat[i] = (i * directionMultiplier) + tile_index
     }
+    return new_boat;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -65,31 +59,17 @@ class GameBoard extends React.Component {
                   });
   }
 
-  raisePlacementError(boatIndex, direction) {
+  raisePlacementError(newBoat) {
+    // rule 1: ship cannot be placed on top of another ship
     for (let key in this.state.ships) {
-      if(this.state.ships[key].includes(boatIndex)) {
-        console.log('error! Each boat piece must have its own tile');
-        return true;
+      for (let i = 0; i < newBoat.length; i++) {
+        if (this.state.ships[key].includes(newBoat[i])) {
+          console.log('error! Each boat piece must have its own tile');
+          return true;
+        }
       }
     }
-
-    var currentBoat = this.state.current_boat;
-    var shipArrFiltered = this.state.ships[currentBoat].filter(n => n);
-    if (shipArrFiltered === undefined || shipArrFiltered.length == 0) {
-      return false;
-    }
-
-    console.log(shipArrFiltered);
-
-
-    // var shipMax = Math.max(...shipArrFiltered);
-    // var shipMin = Math.min(...shipArrFiltered);
-    // var horizontalIndexBad = !(boatIndex === shipMax + 1 || boatIndex === shipMin - 1)
-    //
-    // if (horizontalIndexBad) {
-    //   console.log('error! Must place ship in adjacent tile');
-    //   return true;
-    // }
+    // rule 2: ship must be on the board
   }
 
   verifyAllShipsCompleted() {
