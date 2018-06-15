@@ -71,8 +71,13 @@ class GameBoard extends React.Component {
           return true;
         }
         // rule 3: ship cannot wrap into next row - horizontal check
-        newBoat.slice(-1).pop()
-        // newBoat[0]'s row is not different than newBoat.last
+        var startRow = Math.ceil(((newBoat[0] + 1) / 10));
+        var endRow = Math.ceil(((newBoat.slice(-1).pop() + 1) / 10));
+
+        if (startRow !== endRow) {
+          console.log('error! Boat pieces must be placed in a single row');
+          return true;
+        }
       }
     }
   }
