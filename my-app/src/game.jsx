@@ -1,10 +1,6 @@
 import React from 'react';
 import GameBoard from './gameboard.jsx';
-
-
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+import Title from './title.jsx';
 
 
 class Game extends React.Component {
@@ -31,14 +27,6 @@ class Game extends React.Component {
     }
   }
 
-  renderShipTitle() {
-    if (this.state.current_boat === "aircraftCarrier") {
-      return "Aircraft Carrier"
-    } else if (typeof this.state.current_boat === 'string') {
-      return capitalizeFirstLetter(this.state.current_boat);
-    }
-  }
-
   updateGameStatus(previous_status) {
     var current_status = previous_status === 'Placing Boats' ? 'Combat' : 'Placing Boats'
     this.setState({
@@ -51,26 +39,6 @@ class Game extends React.Component {
     this.setState({
       ship_direction: direction,
     })
-  }
-
-  renderHeader() {
-    if(this.state.status === 'Placing Boats') {
-      return (
-        <div>
-          <h2>Game: {this.state.status}</h2>
-          <div>
-            <h3>Now Placing {this.renderShipTitle()}</h3>
-            <button onClick={() => {this.handleDirectionChange();}}>Toggle Direction</button>
-          </div>
-        </div>
-      )
-    } else {
-      return (
-        <div>
-          <h2>Game: {this.state.status}</h2>
-        </div>
-      )
-    }
   }
 
   renderError() {
@@ -86,7 +54,10 @@ class Game extends React.Component {
   render() {
     return (
       <div className="game">
-        {this.renderHeader()}
+        <Title
+          status={this.state.status}
+          current_boat={this.state.current_boat}
+        />
         {this.renderError()}
         <div className="game-board">
           <GameBoard
